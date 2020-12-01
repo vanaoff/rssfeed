@@ -1,0 +1,11 @@
+---
+extends: default
+
+rules:
+  line-length:
+    max: 150
+  comments-indentation:
+    level: error
+  indentation:
+    spaces: consistent
+    indent-sequences: consistent
