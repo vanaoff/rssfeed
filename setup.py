@@ -8,5 +8,4 @@ setup(
     author_email="ivan.heda@gmail.com",
     license="MIT",
     packages=find_packages(include=["rssfeed*"]),
-    install_requires=["flask"],
 )

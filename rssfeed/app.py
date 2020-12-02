@@ -1,23 +1,18 @@
-from flask import Flask
+from flask import Flask, Response
 
 app = Flask(__name__)
+
+CACHE = dict()
 
 
 @app.route("/")
 def hello():
-    return "Hello man ❤"
+    return "🚀🚀🚀"
 
 
 @app.route("/dilbert")
 def dilbert():
-    return "dilbert"
+    from .dilbert import transform_feed
 
-
-@app.route("/xkcd")
-def xkcd():
-    return "xkcd"
-
-
-@app.route("/commit-strip")
-def commit_strip():
-    return "commit-strip"
+    xml = transform_feed(cache=CACHE)
+    return Response(xml, mimetype="text/xml")

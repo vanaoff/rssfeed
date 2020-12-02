@@ -1,6 +1,9 @@
-FROM python:alpine
+FROM python:slim
 
 RUN pip install --no-cache gunicorn
+
+COPY requirements.txt .
+RUN pip install -r requirements.txt
 
 COPY . /rssfeed
 RUN pip install /rssfeed
