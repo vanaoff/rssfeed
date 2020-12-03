@@ -8,4 +8,5 @@ RUN pip install -r requirements.txt
 COPY . /rssfeed
 RUN pip install /rssfeed
 
-CMD gunicorn --bind 0.0.0.0 rssfeed:app
+WORKDIR /var/rssfeed
+CMD gunicorn --bind 0.0.0.0 "rssfeed:server()"
