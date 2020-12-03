@@ -2,38 +2,50 @@ import logging
 import os
 import time
 from threading import Thread
+from typing import Type
 
 from flask import Flask, Response, abort
 
 from rssfeed.custom import Dilbert
+from rssfeed.feed import Feed
 
 logger = logging.getLogger(__name__)
 
-FEEDS_DIR = "feeds"
-
-FEEDS = ((Dilbert, "dilbert.xml"),)
+FEEDS = {"dilbert": Dilbert}
 
 
-def update_feeds(sleep=600):
+def feed_file(name: str) -> str:
+    return os.path.join("feeds", f"{name}.xml")
+
+
+def read_feed(name: str) -> Response:
+    with open(feed_file(name)) as o:
+        return Response(o.read(), mimetype="text/xml")
+
+
+def sync_feed(name: str, cls: Type[Feed], sleep: int = 600):
     while True:
-        for cls, filename in FEEDS:
-            try:
-                t0 = time.time()
-                cls.from_upstream().to_file(os.path.join(FEEDS_DIR, filename))
-                logger.info(
-                    "%s RSS feed updated in %.2fs.", cls.__name__, time.time() - t0
-                )
-                time.sleep(sleep)
-            except Exception:
-                logger.error("%s RSS feed update failed", cls.__name__)
+        try:
+            t0 = time.time()
+            cls.from_upstream().to_file(feed_file(name))
+            logger.info(
+                "%s RSS feed updated in %.2fs.",
+                name.capitalize(),
+                time.time() - t0,
+            )
+            time.sleep(sleep)
+        except Exception:
+            logger.error("%s RSS feed update failed.", name.capitalize())
 
 
-def server():
-    logger.handlers = logging.getLogger("gunicorn.error").handlers
-    logger.setLevel(logging.INFO)
-    thread = Thread(target=update_feeds, args=())
-    thread.daemon = True
-    thread.start()
+def server(timeout=120):
+    gunicorn_logger = logging.getLogger("gunicorn.error")
+    logger.handlers = gunicorn_logger.handlers
+    logger.setLevel(gunicorn_logger.level)
+    for name, cls in FEEDS.items():
+        thread = Thread(target=sync_feed, args=(name, cls))
+        thread.daemon = True
+        thread.start()
 
     app = Flask(__name__)
 
@@ -43,11 +55,16 @@ def server():
 
     @app.route("/<string:feed>")
     def feeds(feed):
-        file = os.path.join(FEEDS_DIR, f"{feed}.xml")
-        if os.path.exists(file):
-            with open(file) as o:
-                return Response(o.read(), mimetype="text/xml")
+        if feed in FEEDS:
+            for _ in range(timeout):
+                try:
+                    return read_feed(feed)
+                except FileNotFoundError:
+                    logger.debug("Feed %s not exists. Waiting 1s.", feed.capitalize())
+                    time.sleep(1)
+            else:
+                abort(404, description="Not able to load feed 💥.")
         else:
-            abort(404, description="Resource not found 🤷‍♂️")
+            abort(404, description="Feed not supported 🤷‍♂️.")
 
     return app

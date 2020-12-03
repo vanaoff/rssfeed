@@ -9,4 +9,4 @@ COPY . /rssfeed
 RUN pip install /rssfeed
 
 WORKDIR /var/rssfeed
-CMD gunicorn --bind 0.0.0.0 "rssfeed:server()"
+ENTRYPOINT gunicorn --bind 0.0.0.0 "rssfeed:server()"
