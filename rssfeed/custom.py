@@ -1,3 +1,5 @@
+import re
+
 import requests
 from bs4 import BeautifulSoup
 
@@ -22,4 +24,22 @@ class Dilbert(Feed):
             updated=entry["updated"],
             link=entry["link"],
             image_link=extracted["image"],
+        )
+
+
+class Xkcd(Feed):
+    feed_url = "https://xkcd.com/atom.xml"
+    _re_id = re.compile(r"^https?://xkcd.com/(\d+)/?")
+
+    def transform_and_add(self, entry: dict) -> None:
+        soup = BeautifulSoup(entry["summary"], "html.parser")
+        image = soup.find("img")
+        number = self._re_id.search(entry["link"]).group(1)
+        self.add_entry(
+            title=f"Xkcd {number} - {entry['title']}",
+            updated=entry["updated"],
+            link=entry["link"],
+            content=image["title"],
+            image_link=image["src"],
+            mimetype="image/png",
         )

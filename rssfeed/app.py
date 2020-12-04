@@ -6,12 +6,15 @@ from typing import Type
 
 from flask import Flask, Response, abort
 
-from rssfeed.custom import Dilbert
+from rssfeed.custom import Dilbert, Xkcd
 from rssfeed.feed import Feed
 
 logger = logging.getLogger(__name__)
 
-FEEDS = {"dilbert": Dilbert}
+FEEDS = {
+    "dilbert": Dilbert,
+    "xkcd": Xkcd,
+}
 
 
 def feed_file(name: str) -> str:
