@@ -49,7 +49,6 @@ class Feed(ABC):
     def add_entry(
         self,
         title: str,
-        publish_date: str,
         link: str,
         updated: str,
         image_link: str,
@@ -58,7 +57,7 @@ class Feed(ABC):
         fe = self._feed_generator.add_entry()
         fe.id(link)
         fe.updated(updated)
-        fe.title(f"{publish_date} - {title}")
+        fe.title(title)
         fe.link([{"rel": "alternate", "type": mimetype, "href": image_link}])
 
     def transform_and_add(self, entry: dict) -> None:

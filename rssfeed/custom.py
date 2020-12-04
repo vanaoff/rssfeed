@@ -18,8 +18,7 @@ class Dilbert(Feed):
         ]:
             extracted[key] = head.find("meta", property=property_)["content"].strip()
         self.add_entry(
-            title=extracted["title"],
-            publish_date=extracted["publish_date"],
+            title=f"{extracted['publish_date']} - {extracted['title']}",
             updated=entry["updated"],
             link=entry["link"],
             image_link=extracted["image"],
