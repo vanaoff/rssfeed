@@ -1,6 +1,6 @@
 import os
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Optional
 
 import feedparser as fp
 import requests
@@ -53,12 +53,15 @@ class Feed(ABC):
         updated: str,
         image_link: str,
         mimetype: str = "image/gif",
+        content: Optional[str] = None,
     ) -> None:
         fe = self._feed_generator.add_entry()
         fe.id(link)
         fe.updated(updated)
         fe.title(title)
         fe.link([{"rel": "alternate", "type": mimetype, "href": image_link}])
+        if content:
+            fe.content(content)
 
     def transform_and_add(self, entry: dict) -> None:
         pass
