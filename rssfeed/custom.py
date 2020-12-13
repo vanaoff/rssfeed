@@ -43,3 +43,18 @@ class Xkcd(Feed):
             image_link=image["src"],
             mimetype="image/png",
         )
+
+
+class CommitStrip(Feed):
+    feed_url = "https://www.commitstrip.com/en/feed/"
+
+    def transform_and_add(self, entry: dict) -> None:
+        soup = BeautifulSoup(requests.get(entry["link"]).text, "html.parser")
+        image = soup.find("div", attrs={"class": "entry-content"}).find("img")["src"]
+        self.add_entry(
+            title=entry["title"],
+            updated=entry["updated"],
+            link=entry["link"],
+            image_link=image,
+            mimetype="image/jpg",
+        )

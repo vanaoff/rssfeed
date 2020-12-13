@@ -28,8 +28,10 @@ class Feed(ABC):
         parsed = fp.parse(feed_xml)
         head = parsed["feed"]
         entries = parsed["entries"]
-        self = cls(head["id"], head["links"], head["title"], head["updated"])
-        for entry in sorted(entries, key=lambda x: x["updated"], reverse=False):
+        id_ = head.get("id") or head["link"]
+        self = cls(id_, head["links"], head["title"], head["updated"])
+        key, *_ = [k for k in ("published_parsed", "updated_parsed") if k in entries[0]]
+        for entry in sorted(entries, key=lambda x: x[key], reverse=False):
             self.transform_and_add(entry)
         return self
 
@@ -63,6 +65,7 @@ class Feed(ABC):
         if content:
             fe.content(content)
 
+    @abstractmethod
     def transform_and_add(self, entry: dict) -> None:
         pass
 
