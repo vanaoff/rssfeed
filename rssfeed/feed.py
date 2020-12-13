@@ -13,7 +13,7 @@ class Feed(ABC):
         id_: str,
         links: List[dict],
         title: str,
-        updated: str,
+        updated: Optional[str],
     ):
         fg = FeedGenerator()
         fg.id(id_)
@@ -29,10 +29,15 @@ class Feed(ABC):
         head = parsed["feed"]
         entries = parsed["entries"]
         id_ = head.get("id") or head["link"]
-        self = cls(id_, head["links"], head["title"], head["updated"])
+        self = cls(id_, head["links"], head["title"], head.get("updated"))
         key, *_ = [k for k in ("published_parsed", "updated_parsed") if k in entries[0]]
+        counter = 0
         for entry in sorted(entries, key=lambda x: x[key], reverse=False):
-            self.transform_and_add(entry)
+            res = self.transform_and_add(entry)
+            if res:
+                counter += 1
+            if counter == 10:
+                break
         return self
 
     @classmethod
@@ -66,7 +71,7 @@ class Feed(ABC):
             fe.content(content)
 
     @abstractmethod
-    def transform_and_add(self, entry: dict) -> None:
+    def transform_and_add(self, entry: dict) -> bool:
         pass
 
     def to_string(self) -> str:
