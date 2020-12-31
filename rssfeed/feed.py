@@ -31,13 +31,9 @@ class Feed(ABC):
         id_ = head.get("id") or head["link"]
         self = cls(id_, head["links"], head["title"], head.get("updated"))
         key, *_ = [k for k in ("published_parsed", "updated_parsed") if k in entries[0]]
-        counter = 0
-        for entry in sorted(entries, key=lambda x: x[key], reverse=False):
-            res = self.transform_and_add(entry)
-            if res:
-                counter += 1
-            if counter == 10:
-                break
+        entries = sorted(entries, key=lambda x: x[key], reverse=True)[:10]
+        for entry in sorted(entries, key=lambda x: x[key]):
+            self.transform_and_add(entry)
         return self
 
     @classmethod
@@ -71,7 +67,7 @@ class Feed(ABC):
             fe.content(content)
 
     @abstractmethod
-    def transform_and_add(self, entry: dict) -> bool:
+    def transform_and_add(self, entry: dict) -> None:
         pass
 
     def to_string(self) -> str:

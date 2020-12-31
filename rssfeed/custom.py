@@ -9,7 +9,7 @@ from rssfeed.feed import Feed
 class Dilbert(Feed):
     feed_url = "https://dilbert.com/feed"
 
-    def transform_and_add(self, entry: dict) -> bool:
+    def transform_and_add(self, entry: dict) -> None:
         soup = BeautifulSoup(requests.get(entry["link"]).text, "html.parser")
         head = soup.select("head")[0]
         extracted = dict()
@@ -25,14 +25,13 @@ class Dilbert(Feed):
             link=entry["link"],
             image_link=extracted["image"],
         )
-        return True
 
 
 class Xkcd(Feed):
     feed_url = "https://xkcd.com/atom.xml"
     _re_id = re.compile(r"^https?://xkcd.com/(\d+)/?")
 
-    def transform_and_add(self, entry: dict) -> bool:
+    def transform_and_add(self, entry: dict) -> None:
         soup = BeautifulSoup(entry["summary"], "html.parser")
         image = soup.find("img")
         number = self._re_id.search(entry["link"]).group(1)
@@ -44,13 +43,12 @@ class Xkcd(Feed):
             image_link=image["src"],
             mimetype="image/png",
         )
-        return True
 
 
 class CommitStrip(Feed):
     feed_url = "https://www.commitstrip.com/en/feed/"
 
-    def transform_and_add(self, entry: dict) -> bool:
+    def transform_and_add(self, entry: dict) -> None:
         soup = BeautifulSoup(requests.get(entry["link"]).text, "html.parser")
         image = soup.find("div", attrs={"class": "entry-content"}).find("img")["src"]
         self.add_entry(
@@ -60,13 +58,12 @@ class CommitStrip(Feed):
             image_link=image,
             mimetype="image/jpg",
         )
-        return True
 
 
 class Opraski(Feed):
     feed_url = "https://historje.tumblr.com/rss"
 
-    def transform_and_add(self, entry: dict) -> bool:
+    def transform_and_add(self, entry: dict) -> None:
         soup = BeautifulSoup(requests.get(entry["link"]).text, "html.parser")
         title = None
         for get_title in (
@@ -80,7 +77,7 @@ class Opraski(Feed):
             except Exception:
                 continue
         if title is None:
-            return False
+            return
 
         image = None
         for get_image in (
@@ -99,7 +96,7 @@ class Opraski(Feed):
                 continue
 
         if image is None:
-            return False
+            return
 
         self.add_entry(
             title=title,
@@ -109,4 +106,3 @@ class Opraski(Feed):
             image_link=image,
             mimetype=f"image/{image[-3:]}",
         )
-        return True
