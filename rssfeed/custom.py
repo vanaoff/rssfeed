@@ -1,5 +1,6 @@
 import re
 
+import dateparser
 import requests
 from bs4 import BeautifulSoup
 
@@ -105,4 +106,23 @@ class Opraski(Feed):
             content=None,
             image_link=image,
             mimetype=f"image/{image[-3:]}",
+        )
+
+
+class ExistentialComics(Feed):
+    feed_url = "https://existentialcomics.com/rss.xml"
+    _re_id = re.compile(r"^https?://existentialcomics.com/comic/(\d+)/?")
+
+    def transform_and_add(self, entry: dict) -> None:
+        soup = BeautifulSoup(entry["summary"], "html.parser")
+        image = soup.find("img")
+        number = self._re_id.search(entry["link"]).group(1)
+        published = dateparser.parse(entry["published"])
+        self.add_entry(
+            title=f"Existential Comics {number} - {entry['title']}",
+            updated=published.isoformat(),
+            link=entry["link"],
+            content=None,
+            image_link=image["src"],
+            mimetype="image/png",
         )

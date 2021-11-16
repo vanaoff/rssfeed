@@ -6,7 +6,7 @@ from typing import Type
 
 from flask import Flask, Response, abort
 
-from rssfeed.custom import CommitStrip, Dilbert, Opraski, Xkcd
+from rssfeed.custom import CommitStrip, Dilbert, ExistentialComics, Opraski, Xkcd
 from rssfeed.feed import Feed
 
 logger = logging.getLogger(__name__)
@@ -16,6 +16,7 @@ FEEDS = {
     "xkcd": Xkcd,
     "commit-strip": CommitStrip,
     "opraski": Opraski,
+    "existentialcomics": ExistentialComics,
 }
 
 
