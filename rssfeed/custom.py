@@ -100,7 +100,7 @@ class Opraski(Feed):
             return
 
         self.add_entry(
-            title=title,
+            title=title or entry["link"],
             updated=entry["published"],
             link=entry["link"],
             content=None,
