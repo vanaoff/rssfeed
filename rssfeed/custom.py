@@ -69,7 +69,7 @@ class Opraski(Feed):
         title = None
         for get_title in (
             lambda: soup.find("title").text.strip(),
-            lambda: BeautifulSoup(entry["summary"]).text.strip(),
+            lambda: BeautifulSoup(entry["summary"], "html.parser").text.strip(),
             lambda: entry["published"],
         ):
             try:
